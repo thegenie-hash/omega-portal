@@ -1,51 +1,45 @@
 const express      = require('express');
-const sqlite3      = require('sqlite3');
-const { open }     = require('sqlite');
 const bcrypt       = require('bcryptjs');
 const jwt          = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const cors         = require('cors');
 const path         = require('path');
+const fs           = require('fs');
 
 const app        = express();
 const JWT_SECRET = process.env.JWT_SECRET || 'oa-jwt-secret-omega-algo-2026';
 const PORT       = process.env.PORT || 3000;
+const DB_FILE    = path.join(__dirname, 'db.json');
 
-// ── DB init ──────────────────────────────────────
-let db;
-async function initDB() {
-  db = await open({ filename: path.join(__dirname, 'data.db'), driver: sqlite3.Database });
+// ── JSON "database" ──────────────────────────────
+function readDB() {
+  if (!fs.existsSync(DB_FILE)) return { users: [], clients: [] };
+  return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+}
+function writeDB(data) {
+  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+}
+function nextId(arr) {
+  return arr.length ? Math.max(...arr.map(x => x.id)) + 1 : 1;
+}
 
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS users (
-      id         INTEGER PRIMARY KEY AUTOINCREMENT,
-      email      TEXT    UNIQUE NOT NULL,
-      password   TEXT    NOT NULL,
-      name       TEXT    NOT NULL,
-      role       TEXT    NOT NULL DEFAULT 'client',
-      created_at TEXT    DEFAULT (datetime('now'))
-    );
-    CREATE TABLE IF NOT EXISTS clients (
-      id           INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id      INTEGER UNIQUE NOT NULL REFERENCES users(id),
-      firm         TEXT    NOT NULL DEFAULT 'Tradeify',
-      account_size INTEGER NOT NULL DEFAULT 25000,
-      equity       REAL    NOT NULL DEFAULT 0,
-      status       TEXT    NOT NULL DEFAULT 'Active',
-      notes        TEXT    DEFAULT '',
-      updated_at   TEXT    DEFAULT (datetime('now'))
-    );
-  `);
-
-  // Seed admin
-  const admin = await db.get('SELECT id FROM users WHERE email = ?', 'kipsantiago22@gmail.com');
-  if (!admin) {
-    const hash = bcrypt.hashSync('OmegaAdmin2026!', 10);
-    await db.run('INSERT INTO users (email, password, name, role) VALUES (?,?,?,?)',
-      'kipsantiago22@gmail.com', hash, 'Kip Santiago', 'admin');
+// Seed admin on startup
+(function seedAdmin() {
+  const db = readDB();
+  const exists = db.users.find(u => u.email === 'kipsantiago22@gmail.com');
+  if (!exists) {
+    db.users.push({
+      id: nextId(db.users),
+      email: 'kipsantiago22@gmail.com',
+      password: bcrypt.hashSync('OmegaAdmin2026!', 10),
+      name: 'Kip Santiago',
+      role: 'admin',
+      created_at: new Date().toISOString()
+    });
+    writeDB(db);
     console.log('Admin seeded');
   }
-}
+})();
 
 // ── Middleware ───────────────────────────────────
 app.use(express.json());
@@ -68,10 +62,11 @@ function requireAdmin(req, res, next) {
 }
 
 // ── Auth routes ──────────────────────────────────
-app.post('/api/login', async (req, res) => {
+app.post('/api/login', (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
-  const user = await db.get('SELECT * FROM users WHERE email = ?', email.trim().toLowerCase());
+  const db   = readDB();
+  const user = db.users.find(u => u.email === email.trim().toLowerCase());
   if (!user || !bcrypt.compareSync(password, user.password))
     return res.status(401).json({ error: 'Invalid email or password' });
   const token = jwt.sign({ id: user.id, email: user.email, name: user.name, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
@@ -84,70 +79,88 @@ app.post('/api/logout', (req, res) => {
   res.json({ ok: true });
 });
 
-app.get('/api/me', requireAuth, async (req, res) => {
-  const user = await db.get('SELECT id, email, name, role FROM users WHERE id = ?', req.user.id);
+app.get('/api/me', requireAuth, (req, res) => {
+  const db   = readDB();
+  const user = db.users.find(u => u.id === req.user.id);
   if (!user) return res.status(404).json({ error: 'Not found' });
-  res.json(user);
+  res.json({ id: user.id, email: user.email, name: user.name, role: user.role });
 });
 
 // ── Dashboard ────────────────────────────────────
-app.get('/api/dashboard', requireAuth, async (req, res) => {
-  const user = await db.get('SELECT id, email, name, role FROM users WHERE id = ?', req.user.id);
+app.get('/api/dashboard', requireAuth, (req, res) => {
+  const db     = readDB();
+  const user   = db.users.find(u => u.id === req.user.id);
   if (!user) return res.status(404).json({ error: 'Not found' });
   if (user.role === 'admin') return res.json({ role: 'admin' });
-  const client = await db.get('SELECT * FROM clients WHERE user_id = ?', user.id);
-  res.json({ role: 'client', name: user.name, email: user.email, client: client || null });
+  const client = db.clients.find(c => c.user_id === user.id) || null;
+  res.json({ role: 'client', name: user.name, email: user.email, client });
 });
 
 // ── Admin: list clients ──────────────────────────
-app.get('/api/admin/clients', requireAdmin, async (req, res) => {
-  const clients = await db.all(`
-    SELECT u.id, u.email, u.name, u.created_at,
-           c.firm, c.account_size, c.equity, c.status, c.notes, c.updated_at
-    FROM users u LEFT JOIN clients c ON c.user_id = u.id
-    WHERE u.role = 'client' ORDER BY u.created_at DESC
-  `);
+app.get('/api/admin/clients', requireAdmin, (req, res) => {
+  const db = readDB();
+  const clients = db.users
+    .filter(u => u.role === 'client')
+    .map(u => {
+      const c = db.clients.find(c => c.user_id === u.id) || {};
+      return { id: u.id, email: u.email, name: u.name, created_at: u.created_at,
+               firm: c.firm, account_size: c.account_size, equity: c.equity,
+               status: c.status, notes: c.notes, updated_at: c.updated_at };
+    })
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   res.json(clients);
 });
 
 // ── Admin: create client ─────────────────────────
-app.post('/api/admin/clients', requireAdmin, async (req, res) => {
+app.post('/api/admin/clients', requireAdmin, (req, res) => {
   const { email, name, password, firm, account_size, equity, status, notes } = req.body;
   if (!email || !name || !password) return res.status(400).json({ error: 'Email, name and password required' });
-  const existing = await db.get('SELECT id FROM users WHERE email = ?', email.trim().toLowerCase());
-  if (existing) return res.status(409).json({ error: 'Email already exists' });
-  const hash = bcrypt.hashSync(password, 10);
-  const r = await db.run('INSERT INTO users (email, password, name, role) VALUES (?,?,?,?)',
-    email.trim().toLowerCase(), hash, name, 'client');
-  await db.run('INSERT INTO clients (user_id, firm, account_size, equity, status, notes) VALUES (?,?,?,?,?,?)',
-    r.lastID, firm || 'Tradeify', account_size || 25000, equity || 0, status || 'Active', notes || '');
-  res.json({ ok: true, id: r.lastID });
+  const db = readDB();
+  if (db.users.find(u => u.email === email.trim().toLowerCase()))
+    return res.status(409).json({ error: 'Email already exists' });
+  const userId = nextId(db.users);
+  db.users.push({ id: userId, email: email.trim().toLowerCase(),
+    password: bcrypt.hashSync(password, 10), name, role: 'client',
+    created_at: new Date().toISOString() });
+  db.clients.push({ id: nextId(db.clients), user_id: userId,
+    firm: firm || 'Tradeify', account_size: account_size || 25000,
+    equity: equity || 0, status: status || 'Active', notes: notes || '',
+    updated_at: new Date().toISOString() });
+  writeDB(db);
+  res.json({ ok: true, id: userId });
 });
 
 // ── Admin: update client ─────────────────────────
-app.put('/api/admin/clients/:id', requireAdmin, async (req, res) => {
+app.put('/api/admin/clients/:id', requireAdmin, (req, res) => {
   const { firm, account_size, equity, status, notes, name } = req.body;
   const uid = parseInt(req.params.id);
-  await db.run('UPDATE users SET name = ? WHERE id = ?', name, uid);
-  await db.run(`UPDATE clients SET firm=?, account_size=?, equity=?, status=?, notes=?, updated_at=datetime('now') WHERE user_id=?`,
-    firm, account_size, equity, status, notes, uid);
+  const db  = readDB();
+  const user = db.users.find(u => u.id === uid);
+  if (user) user.name = name;
+  const client = db.clients.find(c => c.user_id === uid);
+  if (client) Object.assign(client, { firm, account_size, equity, status, notes, updated_at: new Date().toISOString() });
+  writeDB(db);
   res.json({ ok: true });
 });
 
 // ── Admin: delete client ─────────────────────────
-app.delete('/api/admin/clients/:id', requireAdmin, async (req, res) => {
+app.delete('/api/admin/clients/:id', requireAdmin, (req, res) => {
   const uid = parseInt(req.params.id);
-  await db.run('DELETE FROM clients WHERE user_id = ?', uid);
-  await db.run("DELETE FROM users WHERE id = ? AND role = 'client'", uid);
+  const db  = readDB();
+  db.clients = db.clients.filter(c => c.user_id !== uid);
+  db.users   = db.users.filter(u => !(u.id === uid && u.role === 'client'));
+  writeDB(db);
   res.json({ ok: true });
 });
 
 // ── Admin: reset password ────────────────────────
-app.post('/api/admin/clients/:id/reset-password', requireAdmin, async (req, res) => {
+app.post('/api/admin/clients/:id/reset-password', requireAdmin, (req, res) => {
   const { password } = req.body;
   if (!password) return res.status(400).json({ error: 'Password required' });
-  const hash = bcrypt.hashSync(password, 10);
-  await db.run('UPDATE users SET password = ? WHERE id = ?', hash, parseInt(req.params.id));
+  const db   = readDB();
+  const user = db.users.find(u => u.id === parseInt(req.params.id));
+  if (user) user.password = bcrypt.hashSync(password, 10);
+  writeDB(db);
   res.json({ ok: true });
 });
 
@@ -157,9 +170,4 @@ app.get('/{*path}', (req, res) => {
 });
 
 // ── Start ────────────────────────────────────────
-initDB().then(() => {
-  app.listen(PORT, () => console.log(`Omega Portal running on port ${PORT}`));
-}).catch(err => {
-  console.error('DB init failed:', err);
-  process.exit(1);
-});
+app.listen(PORT, () => console.log(`Omega Portal running on port ${PORT}`));
