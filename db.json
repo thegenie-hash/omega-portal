@@ -1,0 +1,13 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "email": "kipsantiago22@gmail.com",
+      "password": "$2b$10$BFIB7wUyb4FSvfAxGLVkj.qvfUw3JI3zS4Igd2cnELU/o4IrS9QQq",
+      "name": "Kip Santiago",
+      "role": "admin",
+      "created_at": "2026-05-29T01:06:37.056Z"
+    }
+  ],
+  "clients": []
+}
