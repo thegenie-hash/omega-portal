@@ -208,7 +208,7 @@ app.post('/api/admin/clients/:id/reset-password', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
-// ── Reseed route (emergency admin restore) ──────
+// ── Reseed route (emergency admin restore) ─────
 app.get('/api/reseed-omega-2026', (req, res) => {
   const db = readDB();
   const exists = db.users.find(u => u.email === 'kipsantiago22@gmail.com');
