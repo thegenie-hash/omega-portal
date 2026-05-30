@@ -64,7 +64,7 @@ async function loadDashboard(user) {
     const data = await res.json();
     const c    = data.client;
 
-    if (!c) {
+    if (!c || (!c.equity && !c.account_size)) {
       document.getElementById('dashNoClient').classList.remove('hidden');
       return;
     }
@@ -213,7 +213,6 @@ document.getElementById('clientForm').addEventListener('submit', async (e) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      // reset password if provided
       if (payload.password) {
         await fetch(`/api/admin/clients/${userId}/reset-password`, {
           method: 'POST', credentials: 'include',
