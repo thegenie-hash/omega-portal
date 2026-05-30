@@ -429,4 +429,58 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 
   /* Modal */
   .modal-card { max-height: 95vh; }
-  .modal-header { 
+  .modal-header { padding: 18px 18px 0; }
+  .modal-form { padding: 18px; gap: 14px; }
+  .field-row { grid-template-columns: 1fr; }
+
+  /* Admin top bar */
+  .admin-top { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .admin-top h2 { font-size: 1.3rem; }
+
+  /* Table → card layout on mobile */
+  .client-table-wrap { border-radius: var(--radius-lg); }
+  .client-table thead { display: none; }
+  .client-table, .client-table tbody, .client-table tr, .client-table td {
+    display: block; width: 100%;
+  }
+  .client-table tr {
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
+  }
+  .client-table tr:last-child { border-bottom: none; }
+  .client-table td {
+    padding: 3px 0;
+    border-bottom: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.83rem;
+  }
+  .client-table td::before {
+    content: attr(data-label);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--faint);
+    flex-shrink: 0;
+    margin-right: 12px;
+  }
+  .table-actions {
+    justify-content: flex-end;
+    padding-top: 6px;
+    margin-top: 4px;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+  .table-actions::before { display: none !important; }
+
+  /* Footer links */
+  .dash-footer-links { flex-wrap: wrap; gap: 14px; }
+}
+
+@media (max-width: 480px) {
+  .dash-cards { grid-template-columns: 1fr; }
+  .login-wrap { padding: 24px 16px; }
+  .login-card { padding: 24px 16px; }
+  .dash-card-value { font-size: 1.5rem; }
+}
