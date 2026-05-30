@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Client Portal — Omega Algo</title>
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=satoshi@300,400,500,700&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="portal.css" />
 </head>
 <body>
@@ -54,6 +54,26 @@
       <div class="dash-greeting">
         <h2>Welcome back, <span id="dashGreetName"></span></h2>
         <p>Here's a live snapshot of your trading account.</p>
+      </div>
+
+      <!-- Agreement banner (shown if not signed) -->
+      <div id="agreementBanner" class="agreement-banner hidden">
+        <div class="agreement-banner-left">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <div>
+            <strong>Trade Authorization Agreement</strong>
+            <span>You haven't signed your agreement yet. Required before trading begins.</span>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="showPage('sign')">Sign Agreement →</button>
+      </div>
+
+      <!-- Agreement signed badge -->
+      <div id="agreementSigned" class="agreement-signed hidden">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span>Agreement Signed</span>
+        <span id="agreementSignedDate" class="agreement-signed-date"></span>
+        <button class="btn-ghost btn-xs" id="viewSnapshotBtn">View Snapshot</button>
       </div>
 
       <!-- No client record yet — onboarding welcome -->
@@ -141,6 +161,140 @@
     </main>
   </div>
 
+  <!-- ═══ SIGN AGREEMENT PAGE ═══ -->
+  <div id="page-sign" class="page hidden">
+    <header class="portal-header">
+      <a href="/" class="portal-logo">
+        <span class="portal-logo-omega portal-logo-omega--sm" aria-hidden="true">Ω</span>
+        <span class="portal-logo-text sm">OMEGA<span class="portal-logo-sub">ALGO</span></span>
+      </a>
+      <div class="portal-header-right">
+        <button class="btn-ghost" onclick="showPage('dashboard')">← Back</button>
+      </div>
+    </header>
+
+    <main class="portal-main container">
+      <div class="sign-wrap">
+
+        <!-- Agreement text -->
+        <div class="sign-doc">
+          <div class="sign-doc-header">
+            <h1 class="sign-doc-company">OMEGA ALGO INC</h1>
+            <h2 class="sign-doc-title">Trade Authorization Agreement</h2>
+            <p class="sign-doc-sub">omegaalgo.net · thegenie@omegaalgo.net</p>
+          </div>
+          <div class="sign-doc-body">
+            <h3>AGREEMENT OVERVIEW</h3>
+            <p>This Trade Authorization Agreement ("Agreement") is entered into between <strong>Omega Algo Inc</strong> ("Authorized Trader"), a trading services company operating out of High Prairie, Alberta, Canada, and the individual or entity identified in the signature block below ("Client"). This Agreement governs the authorization granted by the Client to Omega Algo Inc to execute trades on the Client's behalf through prop firm funded trading accounts.</p>
+
+            <h3>1. DEFINITIONS</h3>
+            <p><strong>1.1 Prop Firm Account:</strong> A funded trading account provided by a third-party proprietary trading firm (including but not limited to Tradeify and Lucid Trading) in which the Client holds an account.</p>
+            <p><strong>1.2 Authorized Trader:</strong> Omega Algo Inc, including its principals, employees, and designated trading systems or algorithms.</p>
+            <p><strong>1.3 Trade Authorization:</strong> The Client's explicit permission, granted herein, for Omega Algo Inc to access and execute trades within the Client's Prop Firm Account.</p>
+            <p><strong>1.4 Net Profits:</strong> Gross realized trading profits minus any fees, commissions, or charges assessed by the applicable prop firm.</p>
+
+            <h3>2. GRANT OF AUTHORIZATION</h3>
+            <p>The Client hereby authorizes Omega Algo Inc to access the Client's Prop Firm Account(s) for the sole purpose of executing trading activities on the Client's behalf. This authorization includes the ability to open, manage, and close trading positions in futures, forex, and any other instruments permitted by the applicable prop firm. This authorization does <strong>NOT</strong> grant Omega Algo Inc the ability to withdraw funds, transfer assets, or modify account settings beyond trading activity.</p>
+
+            <h3>3. PROFIT SHARING ARRANGEMENT</h3>
+            <p>In consideration for the trading services provided, the parties agree to the following profit distribution:</p>
+            <table class="sign-table">
+              <thead><tr><th>Party</th><th>Share of Net Profits</th><th>Distribution Method</th></tr></thead>
+              <tbody>
+                <tr><td>Client</td><td>60%</td><td>Direct payout from prop firm to Client</td></tr>
+                <tr><td>Omega Algo Inc</td><td>40%</td><td>Separate payout from prop firm or Client transfer</td></tr>
+              </tbody>
+            </table>
+            <p>Profit distributions shall follow the payout schedule and policies of the applicable prop firm. Omega Algo Inc shall receive no compensation in periods where no net profits are generated. There are no management fees, retainers, or monthly charges of any kind.</p>
+
+            <h3>4. RISK ACKNOWLEDGMENT</h3>
+            <p>The Client acknowledges and accepts the following:</p>
+            <ul>
+              <li>Trading financial instruments involves substantial risk of loss and is not suitable for all individuals.</li>
+              <li>Past performance of any trading strategy is not indicative of future results.</li>
+              <li>The Client's Prop Firm Account may experience drawdowns or account termination under the prop firm's rules.</li>
+              <li>Omega Algo Inc does not guarantee profits, specific returns, or account preservation.</li>
+              <li>The Client has independently reviewed the terms and risk policies of the applicable prop firm(s).</li>
+              <li>The Client's personal capital is not deposited into the Prop Firm Account; however, loss of the funded account remains a possibility.</li>
+            </ul>
+
+            <h3>5. LIMITATIONS OF AUTHORITY</h3>
+            <p>Omega Algo Inc is authorized solely to execute trades within the Prop Firm Account. Omega Algo Inc shall <strong>NOT</strong>: (a) withdraw funds from the Client's account; (b) transfer assets to any third party; (c) modify account credentials or personal information; (d) pledge, encumber, or assign the Client's account; or (e) take any action outside the scope of trading activity as defined herein.</p>
+
+            <h3>6. TERM AND TERMINATION</h3>
+            <p>This Agreement shall commence on the date of the Client's signature and shall remain in effect until terminated by either party. Either party may terminate this Agreement with <strong>7 days written notice</strong> delivered via email to the other party. Upon termination, Omega Algo Inc shall immediately cease all trading activity in the Client's account. Any profits earned prior to termination shall be distributed in accordance with Section 3.</p>
+
+            <h3>7. GOVERNING LAW &amp; DISPUTE RESOLUTION</h3>
+            <p>This Agreement shall be governed by and construed in accordance with the laws of the Province of Alberta, Canada. Any disputes arising from this Agreement shall first be attempted to be resolved through good-faith negotiation. If unresolved within 30 days, disputes shall be submitted to binding arbitration in Alberta, Canada, in accordance with applicable arbitration rules.</p>
+
+            <h3>8. ENTIRE AGREEMENT</h3>
+            <p>This Agreement constitutes the entire agreement between the parties with respect to the subject matter hereof and supersedes all prior discussions, representations, and agreements. This Agreement may be amended only by a written instrument signed by both parties. If any provision of this Agreement is found to be unenforceable, the remaining provisions shall continue in full force and effect.</p>
+          </div>
+        </div>
+
+        <!-- Signature block -->
+        <div class="sign-block">
+          <h3 class="sign-block-title">Sign This Agreement</h3>
+          <p class="sign-block-sub">Fill in your details and provide your signature below.</p>
+
+          <div class="field-row">
+            <div class="field-group">
+              <label>Full Legal Name</label>
+              <input type="text" id="signName" placeholder="Your full legal name" required />
+            </div>
+            <div class="field-group">
+              <label>Prop Firm Account # <span style="color:var(--faint);font-weight:400">(optional)</span></label>
+              <input type="text" id="signPropAccount" placeholder="e.g. TRD-123456" />
+            </div>
+          </div>
+
+          <div class="field-group" style="margin-top:4px">
+            <label>Date</label>
+            <input type="text" id="signDate" readonly style="color:var(--muted);cursor:default" />
+          </div>
+
+          <!-- Signature pad -->
+          <div class="sig-pad-wrap">
+            <div class="sig-pad-label">
+              <span>Signature</span>
+              <div class="sig-pad-tabs">
+                <button class="sig-tab active" id="tabDraw" onclick="switchSigTab('draw')">Draw</button>
+                <button class="sig-tab" id="tabType" onclick="switchSigTab('type')">Type</button>
+              </div>
+            </div>
+            <div id="sigDrawWrap" class="sig-draw-wrap">
+              <canvas id="sigCanvas" class="sig-canvas"></canvas>
+              <button class="sig-clear" onclick="clearCanvas()">Clear</button>
+            </div>
+            <div id="sigTypeWrap" class="sig-type-wrap hidden">
+              <input type="text" id="sigTypeInput" class="sig-type-input" placeholder="Type your full name" oninput="renderTypedSig()" />
+              <div class="sig-type-preview" id="sigTypePreview"></div>
+            </div>
+          </div>
+
+          <p class="sign-legal-note">By signing above, I confirm I have read and agree to all terms of this Trade Authorization Agreement with Omega Algo Inc.</p>
+          <p class="sign-error hidden" id="signError"></p>
+          <button class="btn-primary btn-lg" id="signSubmitBtn" onclick="submitAgreement()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Sign &amp; Submit Agreement
+          </button>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ═══ SNAPSHOT MODAL ═══ -->
+  <div class="modal-backdrop hidden" id="snapshotModal">
+    <div class="modal-card modal-card--wide">
+      <div class="modal-header">
+        <h3>Signed Agreement</h3>
+        <button class="modal-close" onclick="document.getElementById('snapshotModal').classList.add('hidden')">✕</button>
+      </div>
+      <div class="snapshot-body" id="snapshotBody"></div>
+    </div>
+  </div>
+
   <!-- ═══ ADMIN PANEL ═══ -->
   <div id="page-admin" class="page hidden">
     <header class="portal-header">
@@ -159,7 +313,6 @@
         <h2>Client Management</h2>
         <button class="btn-primary" id="openAddClient">+ Add Client</button>
       </div>
-
       <div id="clientTable" class="client-table-wrap">
         <p class="loading-text">Loading clients...</p>
       </div>
