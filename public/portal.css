@@ -1,486 +1,486 @@
-/* ── Reset & Base ───────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --bg:       #0a0a0a;
-  --surface:  #111111;
-  --surface2: #181818;
-  --border:   rgba(255,255,255,0.08);
-  --accent:   #ff6a00;
-  --accent-glow: rgba(255,106,0,0.15);
-  --text:     #f0efed;
-  --muted:    #9b9997;
-  --faint:    #4a4947;
-  --radius:   12px;
-  --radius-lg:16px;
-  --radius-xl:20px;
+// ── Routing ──────────────────────────────────────
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+  document.getElementById('page-' + id).classList.remove('hidden');
+  if (id === 'sign') initSignPage();
 }
 
-html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Satoshi', sans-serif; -webkit-font-smoothing: antialiased; }
-
-.hidden { display: none !important; }
-.container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
-
-/* ── Pages ─────────────────────────────────────── */
-.page { min-height: 100vh; }
-
-/* ── Logo ──────────────────────────────────────── */
-.portal-logo {
-  display: flex; align-items: center; gap: 10px;
-  text-decoration: none; color: var(--text);
-}
-.portal-logo-text {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.1rem; font-weight: 700;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  display: flex; flex-direction: column; line-height: 1.1;
-}
-.portal-logo-text.sm { font-size: 0.9rem; }
-.portal-logo-sub {
-  font-size: 0.6rem; font-weight: 300;
-  letter-spacing: 0.52em; color: var(--muted);
-  text-align: center;
-}
-.portal-logo-omega {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 2.4rem;
-  font-weight: bold;
-  color: #ff6a00;
-  line-height: 1;
-  user-select: none;
-  display: flex;
-  align-items: center;
-}
-.portal-logo-omega--sm {
-  font-size: 1.6rem;
+function fmt(n) {
+  return '$' + Number(n).toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-/* ── Login Page ─────────────────────────────────── */
-.login-wrap {
-  min-height: 100vh; display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 28px; padding: 40px 20px;
-}
-.login-card {
-  width: 100%; max-width: 420px;
-  background: var(--surface);
-  border: 1.5px solid color-mix(in oklab, var(--accent) 25%, transparent);
-  border-radius: var(--radius-xl);
-  padding: 40px;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,106,0,0.06);
-}
-.login-title {
-  font-family: 'Clash Display', sans-serif;
-  font-size: 1.6rem; font-weight: 600;
-  color: var(--text); margin-bottom: 8px;
-}
-.login-sub { font-size: 0.875rem; color: var(--muted); margin-bottom: 28px; }
-
-.login-form { display: flex; flex-direction: column; gap: 16px; }
-
-.field-group { display: flex; flex-direction: column; gap: 6px; }
-.field-group label { font-size: 0.78rem; font-weight: 600; color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; }
-.field-group input,
-.field-group select,
-.field-group textarea {
-  background: var(--surface2);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  padding: 11px 14px;
-  font-size: 0.9rem;
-  color: var(--text);
-  font-family: 'Satoshi', sans-serif;
-  outline: none;
-  transition: border-color 0.2s;
-  width: 100%;
-}
-.field-group input:focus,
-.field-group select:focus,
-.field-group textarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(255,106,0,0.1);
-}
-.field-group textarea { resize: vertical; }
-.field-group select { cursor: pointer; }
-
-.login-error {
-  font-size: 0.82rem; color: #e05a00; font-weight: 600;
-  min-height: 18px;
-}
-
-.btn-primary {
-  background: var(--accent); color: #fff;
-  border: none; border-radius: var(--radius);
-  padding: 12px 22px; font-size: 0.9rem; font-weight: 700;
-  cursor: pointer; transition: background 0.2s, transform 0.15s;
-  font-family: 'Satoshi', sans-serif;
-  display: inline-flex; align-items: center; gap: 8px;
-}
-.btn-primary:hover { background: #e05a00; transform: translateY(-1px); }
-.btn-primary:active { transform: translateY(0); }
-
-.btn-ghost {
-  background: transparent; color: var(--muted);
-  border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 8px 16px; font-size: 0.85rem; font-weight: 500;
-  cursor: pointer; transition: color 0.2s, border-color 0.2s;
-  font-family: 'Satoshi', sans-serif;
-}
-.btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
-
-.back-link {
-  font-size: 0.82rem; color: var(--faint); text-decoration: none;
-  transition: color 0.2s;
-}
-.back-link:hover { color: var(--muted); }
-
-/* ── Portal Header ──────────────────────────────── */
-.portal-header {
-  display: flex; align-items: center; justify-content: space-between;
-  height: 72px; padding: 0 32px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  position: sticky; top: 0; z-index: 100;
-}
-.portal-header-right { display: flex; align-items: center; gap: 14px; }
-.portal-user-name { font-size: 0.85rem; color: var(--muted); font-weight: 500; }
-.admin-badge {
-  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
-  background: var(--accent-glow);
-  border: 1px solid color-mix(in oklab, var(--accent) 35%, transparent);
-  color: var(--accent); border-radius: 999px;
-  padding: 3px 10px; text-transform: uppercase;
-}
-
-/* ── Portal Main ────────────────────────────────── */
-.portal-main { padding: 48px 24px 80px; }
-
-/* ── Dashboard ──────────────────────────────────── */
-.dash-greeting { margin-bottom: 36px; }
-.dash-greeting h2 {
-  font-family: 'Clash Display', sans-serif;
-  font-size: 1.8rem; font-weight: 600; color: var(--text);
-  margin-bottom: 6px;
-}
-.dash-greeting p { font-size: 0.9rem; color: var(--muted); }
-
-.dash-cards {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 36px;
-}
-.dash-card {
-  display: flex; flex-direction: column; gap: 6px;
-  padding: 24px 20px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-}
-.dash-card.accent {
-  background: color-mix(in oklab, var(--accent) 7%, var(--surface));
-  border-color: color-mix(in oklab, var(--accent) 28%, transparent);
-}
-.dash-card-label {
-  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em;
-  text-transform: uppercase; color: var(--muted);
-}
-.dash-card-value {
-  font-family: 'Clash Display', sans-serif;
-  font-size: 1.7rem; font-weight: 700; color: var(--accent);
-  line-height: 1; letter-spacing: -0.02em;
-}
-.dash-card-value.sm { font-size: 1.2rem; }
-.dash-card-sub { font-size: 0.75rem; color: var(--faint); }
-
-.dash-notes { margin-bottom: 36px; }
-.dash-section-title {
-  font-family: 'Clash Display', sans-serif;
-  font-size: 1rem; font-weight: 600; color: var(--text);
-  margin-bottom: 14px;
-}
-.notes-box {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 20px 24px;
-  font-size: 0.88rem; color: var(--muted); line-height: 1.7;
-  white-space: pre-wrap;
-}
-
-.empty-state {
-  text-align: center; padding: 64px 24px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  margin-bottom: 36px;
-}
-.empty-icon {
-  width: 56px; height: 56px;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--accent-glow);
-  border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
-  border-radius: var(--radius-lg);
-  color: var(--accent); margin: 0 auto 18px;
-}
-.empty-state h3 {
-  font-family: 'Clash Display', sans-serif;
-  font-size: 1.1rem; color: var(--text); margin-bottom: 8px;
-}
-.empty-state p { font-size: 0.85rem; color: var(--muted); max-width: 38ch; margin: 0 auto; }
-.empty-state a { color: var(--accent); }
-
-.dash-footer-links { display: flex; gap: 20px; margin-top: 8px; }
-
-/* ── Onboarding welcome screen ──────────────────── */
-.onboard-welcome {
-  background: var(--surface);
-  border: 1px solid rgba(255,106,0,0.2);
-  border-radius: var(--radius-xl);
-  padding: 32px;
-  margin-bottom: 36px;
-}
-.onboard-welcome-top {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 28px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--border);
-}
-.onboard-welcome-icon {
-  width: 52px; height: 52px;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(255,106,0,0.1);
-  border: 1px solid rgba(255,106,0,0.25);
-  border-radius: var(--radius-lg);
-  color: var(--accent);
-  flex-shrink: 0;
-}
-.onboard-welcome-top h3 {
-  font-family: 'Clash Display', sans-serif;
-  font-size: 1.2rem; font-weight: 600;
-  color: var(--text); margin-bottom: 4px;
-}
-.onboard-welcome-top p {
-  font-size: 0.85rem; color: var(--muted);
-}
-.onboard-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-.onboard-step {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-}
-.onboard-step-num {
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  background: rgba(255,106,0,0.1);
-  border: 1px solid rgba(255,106,0,0.25);
-  color: var(--accent);
-  font-size: 0.75rem; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.onboard-step-body {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding-top: 4px;
-}
-.onboard-step-body strong {
-  font-size: 0.88rem; font-weight: 600; color: var(--text);
-}
-.onboard-step-body span {
-  font-size: 0.82rem; color: var(--muted);
-}
-.onboard-contact {
-  font-size: 0.82rem;
-  color: var(--faint);
-  padding-top: 20px;
-  border-top: 1px solid var(--border);
-}
-.onboard-contact a { color: var(--accent); text-decoration: none; }
-.onboard-contact a:hover { text-decoration: underline; }
-.dash-link { font-size: 0.82rem; color: var(--faint); text-decoration: none; transition: color 0.2s; }
-.dash-link:hover { color: var(--accent); }
-
-/* ── Admin Panel ────────────────────────────────── */
-.admin-top {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 28px;
-}
-.admin-top h2 {
-  font-family: 'Clash Display', sans-serif;
-  font-size: 1.6rem; font-weight: 600;
-}
-
-.client-table-wrap {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-}
-.client-table {
-  width: 100%; border-collapse: collapse;
-  font-size: 0.85rem;
-}
-.client-table th {
-  text-align: left; padding: 14px 18px;
-  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.06em;
-  text-transform: uppercase; color: var(--muted);
-  border-bottom: 1px solid var(--border);
-  background: var(--surface2);
-}
-.client-table td {
-  padding: 14px 18px;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  color: var(--text); vertical-align: middle;
-}
-.client-table tr:last-child td { border-bottom: none; }
-.client-table tr:hover td { background: rgba(255,255,255,0.02); }
-
-.status-pill {
-  display: inline-block; padding: 3px 10px; border-radius: 999px;
-  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-}
-.status-Active  { background: rgba(34,197,94,0.12);  color: #4ade80; border: 1px solid rgba(34,197,94,0.25); }
-.status-Paused  { background: rgba(234,179,8,0.12);  color: #fbbf24; border: 1px solid rgba(234,179,8,0.25); }
-.status-Scaling { background: rgba(255,106,0,0.12);  color: #ff6a00; border: 1px solid rgba(255,106,0,0.25); }
-.status-Pending { background: rgba(148,163,184,0.1); color: #94a3b8; border: 1px solid rgba(148,163,184,0.2); }
-
-.table-actions { display: flex; gap: 8px; }
-.btn-table {
-  font-size: 0.75rem; font-weight: 600; padding: 5px 12px;
-  border-radius: 8px; border: 1px solid var(--border);
-  background: var(--surface2); color: var(--muted);
-  cursor: pointer; font-family: 'Satoshi', sans-serif;
-  transition: all 0.2s;
-}
-.btn-table:hover { border-color: var(--accent); color: var(--accent); }
-.btn-table.danger:hover { border-color: #e05a00; color: #e05a00; }
-
-.loading-text { padding: 40px; text-align: center; color: var(--faint); font-size: 0.85rem; }
-.empty-table  { padding: 60px 24px; text-align: center; color: var(--muted); }
-
-/* ── Modal ──────────────────────────────────────── */
-.modal-backdrop {
-  position: fixed; inset: 0; z-index: 200;
-  background: rgba(0,0,0,0.72);
-  backdrop-filter: blur(4px);
-  display: flex; align-items: center; justify-content: center;
-  padding: 20px;
-}
-.modal-card {
-  background: var(--surface);
-  border: 1.5px solid color-mix(in oklab, var(--accent) 25%, transparent);
-  border-radius: var(--radius-xl);
-  width: 100%; max-width: 580px;
-  max-height: 90vh; overflow-y: auto;
-  box-shadow: 0 32px 80px rgba(0,0,0,0.6);
-}
-.modal-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 24px 28px 0;
-}
-.modal-header h3 {
-  font-family: 'Clash Display', sans-serif;
-  font-size: 1.2rem; font-weight: 600;
-}
-.modal-close {
-  background: none; border: none; color: var(--faint);
-  font-size: 1rem; cursor: pointer; padding: 4px;
-  transition: color 0.2s;
-}
-.modal-close:hover { color: var(--text); }
-
-.modal-form { padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; }
-.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.modal-error { font-size: 0.82rem; color: #e05a00; font-weight: 600; }
-.modal-actions { display: flex; justify-content: flex-end; gap: 10px; padding-top: 8px; }
-
-/* ── Mobile ─────────────────────────────────────── */
-@media (max-width: 768px) {
-  /* Layout */
-  .container { padding: 0 16px; }
-  .portal-main { padding: 28px 16px 64px; }
-
-  /* Header */
-  .portal-header { padding: 0 16px; height: 60px; }
-  .portal-user-name { display: none; }
-
-  /* Login */
-  .login-card { padding: 28px 20px; }
-  .login-title { font-size: 1.35rem; }
-
-  /* Dashboard cards */
-  .dash-cards { grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
-  .dash-card { padding: 18px 14px; }
-  .dash-card-value { font-size: 1.35rem; }
-  .dash-greeting h2 { font-size: 1.4rem; }
-  .dash-greeting { margin-bottom: 24px; }
-
-  /* Notes */
-  .notes-box { padding: 16px; font-size: 0.85rem; }
-
-  /* Modal */
-  .modal-card { max-height: 95vh; }
-  .modal-header { padding: 18px 18px 0; }
-  .modal-form { padding: 18px; gap: 14px; }
-  .field-row { grid-template-columns: 1fr; }
-
-  /* Admin top bar */
-  .admin-top { flex-direction: column; align-items: flex-start; gap: 14px; }
-  .admin-top h2 { font-size: 1.3rem; }
-
-  /* Table → card layout on mobile */
-  .client-table-wrap { border-radius: var(--radius-lg); }
-  .client-table thead { display: none; }
-  .client-table, .client-table tbody, .client-table tr, .client-table td {
-    display: block; width: 100%;
+// ── Init: check session ──────────────────────────
+async function init() {
+  try {
+    const res = await fetch('/api/me', { credentials: 'include' });
+    if (!res.ok) { showPage('login'); return; }
+    const user = await res.json();
+    if (user.role === 'admin') {
+      showPage('admin');
+      loadAdminPanel();
+    } else {
+      showPage('dashboard');
+      loadDashboard(user);
+    }
+  } catch {
+    showPage('login');
   }
-  .client-table tr {
-    border-bottom: 1px solid var(--border);
-    padding: 14px 16px;
-  }
-  .client-table tr:last-child { border-bottom: none; }
-  .client-table td {
-    padding: 3px 0;
-    border-bottom: none;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.83rem;
-  }
-  .client-table td::before {
-    content: attr(data-label);
-    font-size: 0.68rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--faint);
-    flex-shrink: 0;
-    margin-right: 12px;
-  }
-  .table-actions {
-    justify-content: flex-end;
-    padding-top: 6px;
-    margin-top: 4px;
-    border-top: 1px solid rgba(255,255,255,0.04);
-  }
-  .table-actions::before { display: none !important; }
-
-  /* Footer links */
-  .dash-footer-links { flex-wrap: wrap; gap: 14px; }
 }
 
-@media (max-width: 480px) {
-  .dash-cards { grid-template-columns: 1fr; }
-  .login-wrap { padding: 24px 16px; }
-  .login-card { padding: 24px 16px; }
-  .dash-card-value { font-size: 1.5rem; }
+// ── LOGIN ────────────────────────────────────────
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('loginBtn');
+  const err = document.getElementById('loginError');
+  btn.textContent = 'Signing in…'; btn.disabled = true; err.textContent = '';
+
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: document.getElementById('loginEmail').value,
+        password: document.getElementById('loginPassword').value
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) { err.textContent = data.error || 'Login failed'; return; }
+    if (data.role === 'admin') { showPage('admin'); loadAdminPanel(); }
+    else { showPage('dashboard'); loadDashboard({ name: data.name }); }
+  } catch {
+    err.textContent = 'Connection error. Please try again.';
+  } finally {
+    btn.textContent = 'Sign In'; btn.disabled = false;
+  }
+});
+
+// ── DASHBOARD ────────────────────────────────────
+async function loadDashboard(user) {
+  document.getElementById('dashUserName').textContent = user.name;
+  document.getElementById('dashGreetName').textContent = user.name.split(' ')[0];
+
+  try {
+    const res  = await fetch('/api/dashboard', { credentials: 'include' });
+    const data = await res.json();
+    const c    = data.client;
+
+    // Agreement status
+    if (data.agreement_signed) {
+      document.getElementById('agreementSigned').classList.remove('hidden');
+      const d = new Date(data.signed_at);
+      document.getElementById('agreementSignedDate').textContent =
+        d.toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' });
+    } else {
+      document.getElementById('agreementBanner').classList.remove('hidden');
+    }
+
+    if (!c || (!c.equity && !c.account_size)) {
+      document.getElementById('dashNoClient').classList.remove('hidden');
+      return;
+    }
+
+    document.getElementById('dashCards').classList.remove('hidden');
+    document.getElementById('cardEquity').textContent = fmt(c.equity);
+    document.getElementById('cardSize').textContent   = fmt(c.account_size);
+    document.getElementById('cardFirm').textContent   = c.firm;
+
+    const statusEl = document.getElementById('cardStatus');
+    statusEl.textContent = c.status;
+    statusEl.className   = 'dash-card-value sm status-pill status-' + c.status;
+
+    if (c.notes && c.notes.trim()) {
+      document.getElementById('dashNotes').classList.remove('hidden');
+      document.getElementById('notesContent').textContent = c.notes;
+    }
+  } catch {
+    document.getElementById('dashNoClient').classList.remove('hidden');
+  }
 }
+
+document.getElementById('dashLogout').addEventListener('click', logout);
+
+// View snapshot button
+document.getElementById('viewSnapshotBtn').addEventListener('click', async () => {
+  try {
+    const res  = await fetch('/api/agreement-snapshot', { credentials: 'include' });
+    const data = await res.json();
+    if (!res.ok) { alert('No snapshot found.'); return; }
+    renderSnapshot(data);
+    document.getElementById('snapshotModal').classList.remove('hidden');
+  } catch {
+    alert('Could not load snapshot.');
+  }
+});
+
+function renderSnapshot(data) {
+  const d = new Date(data.signed_at);
+  const dateStr = d.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' }) +
+    ' at ' + d.toLocaleTimeString('en-CA', { hour: '2-digit', minute: '2-digit' });
+
+  document.getElementById('snapshotBody').innerHTML = `
+    <div class="snapshot-header-block">
+      <div class="snapshot-company">OMEGA ALGO INC</div>
+      <div class="snapshot-title">Trade Authorization Agreement — Signed Copy</div>
+    </div>
+    <div class="snapshot-fields">
+      <div class="snapshot-field">
+        <span class="snapshot-field-label">Full Legal Name</span>
+        <span class="snapshot-field-value">${esc(data.full_name)}</span>
+      </div>
+      <div class="snapshot-field">
+        <span class="snapshot-field-label">Email</span>
+        <span class="snapshot-field-value">${esc(data.email)}</span>
+      </div>
+      <div class="snapshot-field">
+        <span class="snapshot-field-label">Prop Firm Account #</span>
+        <span class="snapshot-field-value">${esc(data.prop_account || '—')}</span>
+      </div>
+      <div class="snapshot-field">
+        <span class="snapshot-field-label">Signed On</span>
+        <span class="snapshot-field-value">${dateStr}</span>
+      </div>
+    </div>
+    <div class="snapshot-sig-label">Signature</div>
+    <div class="snapshot-sig-img">
+      <img src="${data.signature_data}" alt="Signature" />
+    </div>
+    <p class="snapshot-disclaimer">
+      This is a record of the electronically signed Trade Authorization Agreement between the above-named Client and Omega Algo Inc.
+      Signed on ${dateStr} · omegaalgo.net
+    </p>
+  `;
+}
+
+// Close snapshot modal on backdrop click
+document.getElementById('snapshotModal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.add('hidden');
+});
+
+// ── SIGN PAGE ────────────────────────────────────
+let sigMode = 'draw';
+let isDrawing = false;
+let lastX = 0, lastY = 0;
+
+function initSignPage() {
+  // Set today's date
+  const today = new Date();
+  document.getElementById('signDate').value =
+    today.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  // Init canvas
+  const canvas = document.getElementById('sigCanvas');
+  const ctx    = canvas.getContext('2d');
+
+  // Resize canvas to actual pixel dimensions
+  function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    canvas.width  = rect.width  * window.devicePixelRatio;
+    canvas.height = rect.height * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    ctx.strokeStyle = '#f0efed';
+    ctx.lineWidth   = 2.5;
+    ctx.lineCap     = 'round';
+    ctx.lineJoin    = 'round';
+  }
+  resizeCanvas();
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const src  = e.touches ? e.touches[0] : e;
+    return [src.clientX - rect.left, src.clientY - rect.top];
+  }
+
+  canvas.addEventListener('mousedown',  e => { isDrawing = true; [lastX, lastY] = getPos(e); });
+  canvas.addEventListener('mousemove',  e => {
+    if (!isDrawing) return;
+    const [x, y] = getPos(e);
+    ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke();
+    [lastX, lastY] = [x, y];
+  });
+  canvas.addEventListener('mouseup',   () => isDrawing = false);
+  canvas.addEventListener('mouseleave',() => isDrawing = false);
+
+  canvas.addEventListener('touchstart', e => { e.preventDefault(); isDrawing = true; [lastX, lastY] = getPos(e); }, { passive: false });
+  canvas.addEventListener('touchmove',  e => {
+    e.preventDefault();
+    if (!isDrawing) return;
+    const [x, y] = getPos(e);
+    ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke();
+    [lastX, lastY] = [x, y];
+  }, { passive: false });
+  canvas.addEventListener('touchend', () => isDrawing = false);
+
+  window._sigCtx    = ctx;
+  window._sigCanvas = canvas;
+}
+
+function clearCanvas() {
+  const canvas = window._sigCanvas;
+  const ctx    = window._sigCtx;
+  if (!canvas || !ctx) return;
+  ctx.clearRect(0, 0, canvas.width / window.devicePixelRatio, canvas.height / window.devicePixelRatio);
+}
+
+function switchSigTab(mode) {
+  sigMode = mode;
+  document.getElementById('tabDraw').classList.toggle('active', mode === 'draw');
+  document.getElementById('tabType').classList.toggle('active', mode === 'type');
+  document.getElementById('sigDrawWrap').classList.toggle('hidden', mode !== 'draw');
+  document.getElementById('sigTypeWrap').classList.toggle('hidden', mode !== 'type');
+}
+
+function renderTypedSig() {
+  const val = document.getElementById('sigTypeInput').value;
+  document.getElementById('sigTypePreview').textContent = val;
+}
+
+function getSignatureDataURL() {
+  if (sigMode === 'draw') {
+    const canvas = window._sigCanvas;
+    if (!canvas) return null;
+    // Check if canvas has any drawing
+    const ctx  = canvas.getContext('2d');
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    const hasDrawing = data.some(v => v !== 0);
+    if (!hasDrawing) return null;
+    return canvas.toDataURL('image/png');
+  } else {
+    // Render typed name to a canvas
+    const name = document.getElementById('sigTypeInput').value.trim();
+    if (!name) return null;
+    const offscreen = document.createElement('canvas');
+    offscreen.width  = 500;
+    offscreen.height = 100;
+    const ctx = offscreen.getContext('2d');
+    ctx.fillStyle = 'transparent';
+    ctx.clearRect(0, 0, 500, 100);
+    ctx.font      = "56px 'Dancing Script', cursive";
+    ctx.fillStyle = '#f0efed';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(name, 20, 54);
+    return offscreen.toDataURL('image/png');
+  }
+}
+
+async function submitAgreement() {
+  const btn      = document.getElementById('signSubmitBtn');
+  const errEl    = document.getElementById('signError');
+  const fullName = document.getElementById('signName').value.trim();
+
+  errEl.classList.add('hidden');
+
+  if (!fullName) { errEl.textContent = 'Please enter your full legal name.'; errEl.classList.remove('hidden'); return; }
+
+  const sigData = getSignatureDataURL();
+  if (!sigData) {
+    errEl.textContent = sigMode === 'draw'
+      ? 'Please draw your signature in the box above.'
+      : 'Please type your name to generate a signature.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  btn.textContent = 'Submitting…'; btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/sign-agreement', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        full_name:      fullName,
+        prop_account:   document.getElementById('signPropAccount').value.trim(),
+        signature_data: sigData
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) { errEl.textContent = data.error || 'Submission failed.'; errEl.classList.remove('hidden'); return; }
+
+    // Success — go back to dashboard and reload
+    showPage('dashboard');
+    loadDashboard({ name: document.getElementById('dashGreetName').textContent });
+  } catch {
+    errEl.textContent = 'Connection error. Please try again.';
+    errEl.classList.remove('hidden');
+  } finally {
+    btn.textContent = 'Sign & Submit Agreement'; btn.disabled = false;
+  }
+}
+
+window.switchSigTab   = switchSigTab;
+window.clearCanvas    = clearCanvas;
+window.renderTypedSig = renderTypedSig;
+window.submitAgreement= submitAgreement;
+
+// ── ADMIN ────────────────────────────────────────
+let clients = [];
+
+async function loadAdminPanel() {
+  try {
+    const res = await fetch('/api/admin/clients', { credentials: 'include' });
+    clients   = await res.json();
+    renderClientTable();
+  } catch {
+    document.getElementById('clientTable').innerHTML = '<p class="loading-text">Failed to load clients.</p>';
+  }
+}
+
+function renderClientTable() {
+  const wrap = document.getElementById('clientTable');
+
+  if (!clients.length) {
+    wrap.innerHTML = '<p class="empty-table">No clients yet. Click "+ Add Client" to get started.</p>';
+    return;
+  }
+
+  const rows = clients.map(c => {
+    const agr = c.agreement_signed
+      ? `<span class="status-pill" style="background:rgba(34,197,94,0.1);color:#4ade80;border:1px solid rgba(34,197,94,0.25)">✓ Signed</span>`
+      : `<span class="status-pill status-Pending">Unsigned</span>`;
+    return `
+    <tr>
+      <td data-label="Client"><strong>${esc(c.name)}</strong><br><span style="color:var(--faint);font-size:0.75rem">${esc(c.email)}</span></td>
+      <td data-label="Agreement">${agr}</td>
+      <td data-label="Firm">${esc(c.firm || '—')}</td>
+      <td data-label="Account Size">${c.account_size ? fmt(c.account_size) : '—'}</td>
+      <td data-label="Equity">${c.equity != null ? fmt(c.equity) : '—'}</td>
+      <td data-label="Status"><span class="status-pill status-${c.status || 'Pending'}">${esc(c.status || 'Pending')}</span></td>
+      <td>
+        <div class="table-actions">
+          <button class="btn-table" onclick="openEdit(${c.id})">Edit</button>
+          <button class="btn-table danger" onclick="deleteClient(${c.id}, '${esc(c.name)}')">Remove</button>
+        </div>
+      </td>
+    </tr>
+  `}).join('');
+
+  wrap.innerHTML = `
+    <table class="client-table">
+      <thead>
+        <tr>
+          <th>Client</th>
+          <th>Agreement</th>
+          <th>Firm</th>
+          <th>Account Size</th>
+          <th>Equity</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+function esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Add Client ───────────────────────────────────
+document.getElementById('openAddClient').addEventListener('click', () => {
+  document.getElementById('modalTitle').textContent = 'Add Client';
+  document.getElementById('editUserId').value = '';
+  document.getElementById('clientForm').reset();
+  document.getElementById('pwLabel').textContent = '(required)';
+  document.getElementById('cfPassword').required = true;
+  document.getElementById('modalError').classList.add('hidden');
+  document.getElementById('clientModal').classList.remove('hidden');
+});
+
+function openEdit(userId) {
+  const c = clients.find(x => x.id === userId);
+  if (!c) return;
+  document.getElementById('modalTitle').textContent = 'Edit Client';
+  document.getElementById('editUserId').value = userId;
+  document.getElementById('cfName').value = c.name || '';
+  document.getElementById('cfEmail').value = c.email || '';
+  document.getElementById('cfPassword').value = '';
+  document.getElementById('cfPassword').required = false;
+  document.getElementById('pwLabel').textContent = '(leave blank to keep)';
+  document.getElementById('cfFirm').value = c.firm || 'Tradeify';
+  document.getElementById('cfAccountSize').value = c.account_size || '';
+  document.getElementById('cfEquity').value = c.equity || '';
+  document.getElementById('cfStatus').value = c.status || 'Active';
+  document.getElementById('cfNotes').value = c.notes || '';
+  document.getElementById('modalError').classList.add('hidden');
+  document.getElementById('clientModal').classList.remove('hidden');
+}
+window.openEdit = openEdit;
+
+['closeModal', 'cancelModal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', () => {
+    document.getElementById('clientModal').classList.add('hidden');
+  });
+});
+
+document.getElementById('clientForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn    = document.getElementById('saveClientBtn');
+  const errEl  = document.getElementById('modalError');
+  const userId = document.getElementById('editUserId').value;
+  const isEdit = !!userId;
+
+  btn.textContent = 'Saving…'; btn.disabled = true;
+  errEl.classList.add('hidden');
+
+  const payload = {
+    name:         document.getElementById('cfName').value,
+    email:        document.getElementById('cfEmail').value,
+    password:     document.getElementById('cfPassword').value,
+    firm:         document.getElementById('cfFirm').value,
+    account_size: parseFloat(document.getElementById('cfAccountSize').value) || 0,
+    equity:       parseFloat(document.getElementById('cfEquity').value) || 0,
+    status:       document.getElementById('cfStatus').value,
+    notes:        document.getElementById('cfNotes').value,
+  };
+
+  try {
+    let res;
+    if (isEdit) {
+      res = await fetch(`/api/admin/clients/${userId}`, {
+        method: 'PUT', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (payload.password) {
+        await fetch(`/api/admin/clients/${userId}/reset-password`, {
+          method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: payload.password })
+        });
+      }
+    } else {
+      res = await fetch('/api/admin/clients', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    }
+
+    const data = await res.json();
+    if (!res.ok) { errEl.textContent = data.error || 'Save failed'; errEl.classList.remove('hidden'); return; }
+
+    document.getElementById('clientModal').classList.add('hidden');
+    loadAdminPanel();
+  } catch {
+    errEl.textContent = 'Connection error.'; errEl.classList.remove('hidden');
+  } finally {
+    btn.textContent = 'Save Client'; btn.disabled = false;
+  }
+});
+
+async function deleteClient(userId, name) {
+  if (!confirm(`Remove ${name}? This cannot be undone.`)) return;
+  await fetch(`/api/admin/clients/${userId}`, { method: 'DELETE', credentials: 'include' });
+  loadAdminPanel();
+}
+window.deleteClient = deleteClient;
+
+// ── Logout ───────────────────────────────────────
+async function logout() {
+  await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+  showPage('login');
+}
+document.getElementById('adminLogout').addEventListener('click', logout);
+
+// ── Start ────────────────────────────────────────
+init();
