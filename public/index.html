@@ -183,6 +183,7 @@
             <h2 class="sign-doc-title">Trade Authorization Agreement</h2>
             <p class="sign-doc-sub">omegaalgo.net · thegenie@omegaalgo.net</p>
           </div>
+
           <div class="sign-doc-body">
             <h3>AGREEMENT OVERVIEW</h3>
             <p>This Trade Authorization Agreement ("Agreement") is entered into between <strong>Omega Algo Inc</strong> ("Authorized Trader"), a trading services company operating out of High Prairie, Alberta, Canada, and the individual or entity identified in the signature block below ("Client"). This Agreement governs the authorization granted by the Client to Omega Algo Inc to execute trades on the Client's behalf through prop firm funded trading accounts.</p>
@@ -262,10 +263,14 @@
                 <button class="sig-tab" id="tabType" onclick="switchSigTab('type')">Type</button>
               </div>
             </div>
+
+            <!-- Draw -->
             <div id="sigDrawWrap" class="sig-draw-wrap">
               <canvas id="sigCanvas" class="sig-canvas"></canvas>
               <button class="sig-clear" onclick="clearCanvas()">Clear</button>
             </div>
+
+            <!-- Type -->
             <div id="sigTypeWrap" class="sig-type-wrap hidden">
               <input type="text" id="sigTypeInput" class="sig-type-input" placeholder="Type your full name" oninput="renderTypedSig()" />
               <div class="sig-type-preview" id="sigTypePreview"></div>
@@ -273,7 +278,9 @@
           </div>
 
           <p class="sign-legal-note">By signing above, I confirm I have read and agree to all terms of this Trade Authorization Agreement with Omega Algo Inc.</p>
+
           <p class="sign-error hidden" id="signError"></p>
+
           <button class="btn-primary btn-lg" id="signSubmitBtn" onclick="submitAgreement()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
             Sign &amp; Submit Agreement
@@ -313,6 +320,7 @@
         <h2>Client Management</h2>
         <button class="btn-primary" id="openAddClient">+ Add Client</button>
       </div>
+
       <div id="clientTable" class="client-table-wrap">
         <p class="loading-text">Loading clients...</p>
       </div>
