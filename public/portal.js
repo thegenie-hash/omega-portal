@@ -2,6 +2,7 @@
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
   document.getElementById('page-' + id).classList.remove('hidden');
+  if (id === 'sign') initSignPage();
 }
 
 function fmt(n) {
@@ -35,8 +36,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
   try {
     const res = await fetch('/api/login', {
-      method: 'POST',
-      credentials: 'include',
+      method: 'POST', credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email: document.getElementById('loginEmail').value,
@@ -64,6 +64,16 @@ async function loadDashboard(user) {
     const data = await res.json();
     const c    = data.client;
 
+    // Agreement status
+    if (data.agreement_signed) {
+      document.getElementById('agreementSigned').classList.remove('hidden');
+      const d = new Date(data.signed_at);
+      document.getElementById('agreementSignedDate').textContent =
+        d.toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' });
+    } else {
+      document.getElementById('agreementBanner').classList.remove('hidden');
+    }
+
     if (!c || (!c.equity && !c.account_size)) {
       document.getElementById('dashNoClient').classList.remove('hidden');
       return;
@@ -89,6 +99,212 @@ async function loadDashboard(user) {
 
 document.getElementById('dashLogout').addEventListener('click', logout);
 
+// View snapshot button
+document.getElementById('viewSnapshotBtn').addEventListener('click', async () => {
+  try {
+    const res  = await fetch('/api/agreement-snapshot', { credentials: 'include' });
+    const data = await res.json();
+    if (!res.ok) { alert('No snapshot found.'); return; }
+    renderSnapshot(data);
+    document.getElementById('snapshotModal').classList.remove('hidden');
+  } catch {
+    alert('Could not load snapshot.');
+  }
+});
+
+function renderSnapshot(data) {
+  const d = new Date(data.signed_at);
+  const dateStr = d.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' }) +
+    ' at ' + d.toLocaleTimeString('en-CA', { hour: '2-digit', minute: '2-digit' });
+
+  document.getElementById('snapshotBody').innerHTML = `
+    <div class="snapshot-header-block">
+      <div class="snapshot-company">OMEGA ALGO INC</div>
+      <div class="snapshot-title">Trade Authorization Agreement — Signed Copy</div>
+    </div>
+    <div class="snapshot-fields">
+      <div class="snapshot-field">
+        <span class="snapshot-field-label">Full Legal Name</span>
+        <span class="snapshot-field-value">${esc(data.full_name)}</span>
+      </div>
+      <div class="snapshot-field">
+        <span class="snapshot-field-label">Email</span>
+        <span class="snapshot-field-value">${esc(data.email)}</span>
+      </div>
+      <div class="snapshot-field">
+        <span class="snapshot-field-label">Prop Firm Account #</span>
+        <span class="snapshot-field-value">${esc(data.prop_account || '—')}</span>
+      </div>
+      <div class="snapshot-field">
+        <span class="snapshot-field-label">Signed On</span>
+        <span class="snapshot-field-value">${dateStr}</span>
+      </div>
+    </div>
+    <div class="snapshot-sig-label">Signature</div>
+    <div class="snapshot-sig-img">
+      <img src="${data.signature_data}" alt="Signature" />
+    </div>
+    <p class="snapshot-disclaimer">
+      This is a record of the electronically signed Trade Authorization Agreement between the above-named Client and Omega Algo Inc.
+      Signed on ${dateStr} · omegaalgo.net
+    </p>
+  `;
+}
+
+// Close snapshot modal on backdrop click
+document.getElementById('snapshotModal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.add('hidden');
+});
+
+// ── SIGN PAGE ────────────────────────────────────
+let sigMode = 'draw';
+let isDrawing = false;
+let lastX = 0, lastY = 0;
+
+function initSignPage() {
+  const today = new Date();
+  document.getElementById('signDate').value =
+    today.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  const canvas = document.getElementById('sigCanvas');
+  const ctx    = canvas.getContext('2d');
+
+  function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    canvas.width  = rect.width  * window.devicePixelRatio;
+    canvas.height = rect.height * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    ctx.strokeStyle = '#f0efed';
+    ctx.lineWidth   = 2.5;
+    ctx.lineCap     = 'round';
+    ctx.lineJoin    = 'round';
+  }
+  resizeCanvas();
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const src  = e.touches ? e.touches[0] : e;
+    return [src.clientX - rect.left, src.clientY - rect.top];
+  }
+
+  canvas.addEventListener('mousedown',  e => { isDrawing = true; [lastX, lastY] = getPos(e); });
+  canvas.addEventListener('mousemove',  e => {
+    if (!isDrawing) return;
+    const [x, y] = getPos(e);
+    ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke();
+    [lastX, lastY] = [x, y];
+  });
+  canvas.addEventListener('mouseup',   () => isDrawing = false);
+  canvas.addEventListener('mouseleave',() => isDrawing = false);
+
+  canvas.addEventListener('touchstart', e => { e.preventDefault(); isDrawing = true; [lastX, lastY] = getPos(e); }, { passive: false });
+  canvas.addEventListener('touchmove',  e => {
+    e.preventDefault();
+    if (!isDrawing) return;
+    const [x, y] = getPos(e);
+    ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke();
+    [lastX, lastY] = [x, y];
+  }, { passive: false });
+  canvas.addEventListener('touchend', () => isDrawing = false);
+
+  window._sigCtx    = ctx;
+  window._sigCanvas = canvas;
+}
+
+function clearCanvas() {
+  const canvas = window._sigCanvas;
+  const ctx    = window._sigCtx;
+  if (!canvas || !ctx) return;
+  ctx.clearRect(0, 0, canvas.width / window.devicePixelRatio, canvas.height / window.devicePixelRatio);
+}
+
+function switchSigTab(mode) {
+  sigMode = mode;
+  document.getElementById('tabDraw').classList.toggle('active', mode === 'draw');
+  document.getElementById('tabType').classList.toggle('active', mode === 'type');
+  document.getElementById('sigDrawWrap').classList.toggle('hidden', mode !== 'draw');
+  document.getElementById('sigTypeWrap').classList.toggle('hidden', mode !== 'type');
+}
+
+function renderTypedSig() {
+  const val = document.getElementById('sigTypeInput').value;
+  document.getElementById('sigTypePreview').textContent = val;
+}
+
+function getSignatureDataURL() {
+  if (sigMode === 'draw') {
+    const canvas = window._sigCanvas;
+    if (!canvas) return null;
+    const ctx  = canvas.getContext('2d');
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    const hasDrawing = data.some(v => v !== 0);
+    if (!hasDrawing) return null;
+    return canvas.toDataURL('image/png');
+  } else {
+    const name = document.getElementById('sigTypeInput').value.trim();
+    if (!name) return null;
+    const offscreen = document.createElement('canvas');
+    offscreen.width  = 500;
+    offscreen.height = 100;
+    const ctx = offscreen.getContext('2d');
+    ctx.fillStyle = 'transparent';
+    ctx.clearRect(0, 0, 500, 100);
+    ctx.font      = "56px 'Dancing Script', cursive";
+    ctx.fillStyle = '#f0efed';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(name, 20, 54);
+    return offscreen.toDataURL('image/png');
+  }
+}
+
+async function submitAgreement() {
+  const btn      = document.getElementById('signSubmitBtn');
+  const errEl    = document.getElementById('signError');
+  const fullName = document.getElementById('signName').value.trim();
+
+  errEl.classList.add('hidden');
+
+  if (!fullName) { errEl.textContent = 'Please enter your full legal name.'; errEl.classList.remove('hidden'); return; }
+
+  const sigData = getSignatureDataURL();
+  if (!sigData) {
+    errEl.textContent = sigMode === 'draw'
+      ? 'Please draw your signature in the box above.'
+      : 'Please type your name to generate a signature.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  btn.textContent = 'Submitting…'; btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/sign-agreement', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        full_name:      fullName,
+        prop_account:   document.getElementById('signPropAccount').value.trim(),
+        signature_data: sigData
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) { errEl.textContent = data.error || 'Submission failed.'; errEl.classList.remove('hidden'); return; }
+
+    showPage('dashboard');
+    loadDashboard({ name: document.getElementById('dashGreetName').textContent });
+  } catch {
+    errEl.textContent = 'Connection error. Please try again.';
+    errEl.classList.remove('hidden');
+  } finally {
+    btn.textContent = 'Sign & Submit Agreement'; btn.disabled = false;
+  }
+}
+
+window.switchSigTab   = switchSigTab;
+window.clearCanvas    = clearCanvas;
+window.renderTypedSig = renderTypedSig;
+window.submitAgreement= submitAgreement;
+
 // ── ADMIN ────────────────────────────────────────
 let clients = [];
 
@@ -110,9 +326,14 @@ function renderClientTable() {
     return;
   }
 
-  const rows = clients.map(c => `
+  const rows = clients.map(c => {
+    const agr = c.agreement_signed
+      ? `<span class="status-pill" style="background:rgba(34,197,94,0.1);color:#4ade80;border:1px solid rgba(34,197,94,0.25)">✓ Signed</span>`
+      : `<span class="status-pill status-Pending">Unsigned</span>`;
+    return `
     <tr>
       <td data-label="Client"><strong>${esc(c.name)}</strong><br><span style="color:var(--faint);font-size:0.75rem">${esc(c.email)}</span></td>
+      <td data-label="Agreement">${agr}</td>
       <td data-label="Firm">${esc(c.firm || '—')}</td>
       <td data-label="Account Size">${c.account_size ? fmt(c.account_size) : '—'}</td>
       <td data-label="Equity">${c.equity != null ? fmt(c.equity) : '—'}</td>
@@ -124,13 +345,14 @@ function renderClientTable() {
         </div>
       </td>
     </tr>
-  `).join('');
+  `}).join('');
 
   wrap.innerHTML = `
     <table class="client-table">
       <thead>
         <tr>
           <th>Client</th>
+          <th>Agreement</th>
           <th>Firm</th>
           <th>Account Size</th>
           <th>Equity</th>
@@ -186,8 +408,8 @@ window.openEdit = openEdit;
 
 document.getElementById('clientForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const btn   = document.getElementById('saveClientBtn');
-  const errEl = document.getElementById('modalError');
+  const btn    = document.getElementById('saveClientBtn');
+  const errEl  = document.getElementById('modalError');
   const userId = document.getElementById('editUserId').value;
   const isEdit = !!userId;
 
