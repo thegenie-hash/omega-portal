@@ -14,7 +14,7 @@
   <div id="page-login" class="page">
     <div class="login-wrap">
       <a href="/" class="portal-logo">
-        <svg width="48" height="48" viewBox="0 0 64 64" fill="none"><text x="32" y="54" text-anchor="middle" font-family="Georgia, serif" font-size="56" font-weight="bold" fill="#ff6a00">Ω</text></svg>
+        <span class="portal-logo-omega" aria-hidden="true">Ω</span>
         <span class="portal-logo-text">OMEGA<span class="portal-logo-sub">ALGO</span></span>
       </a>
       <div class="login-card">
@@ -41,7 +41,7 @@
   <div id="page-dashboard" class="page hidden">
     <header class="portal-header">
       <a href="/" class="portal-logo">
-        <svg width="38" height="38" viewBox="0 0 64 64" fill="none"><text x="32" y="54" text-anchor="middle" font-family="Georgia, serif" font-size="56" font-weight="bold" fill="#ff6a00">Ω</text></svg>
+        <span class="portal-logo-omega portal-logo-omega--sm" aria-hidden="true">Ω</span>
         <span class="portal-logo-text sm">OMEGA<span class="portal-logo-sub">ALGO</span></span>
       </a>
       <div class="portal-header-right">
@@ -56,13 +56,52 @@
         <p>Here's a live snapshot of your trading account.</p>
       </div>
 
-      <!-- No client record yet -->
-      <div id="dashNoClient" class="empty-state hidden">
-        <div class="empty-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <!-- No client record yet — onboarding welcome -->
+      <div id="dashNoClient" class="hidden">
+        <div class="onboard-welcome">
+          <div class="onboard-welcome-top">
+            <div class="onboard-welcome-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div>
+              <h3>Welcome to Omega Algo</h3>
+              <p>Your account is being configured. Here's what happens next.</p>
+            </div>
+          </div>
+          <div class="onboard-steps">
+            <div class="onboard-step">
+              <div class="onboard-step-num">1</div>
+              <div class="onboard-step-body">
+                <strong>Agreement signed</strong>
+                <span>Your Trade Authorization Agreement is on file.</span>
+              </div>
+            </div>
+            <div class="onboard-step">
+              <div class="onboard-step-num">2</div>
+              <div class="onboard-step-body">
+                <strong>Prop firm account setup</strong>
+                <span>Make sure your Tradeify or Lucid Trading account is funded and ready.</span>
+              </div>
+            </div>
+            <div class="onboard-step">
+              <div class="onboard-step-num">3</div>
+              <div class="onboard-step-body">
+                <strong>Kip configures your dashboard</strong>
+                <span>Your equity, account size, and firm details will appear here once set up.</span>
+              </div>
+            </div>
+            <div class="onboard-step">
+              <div class="onboard-step-num">4</div>
+              <div class="onboard-step-body">
+                <strong>Trading begins</strong>
+                <span>Omega Algo starts executing trades. Check back here for updates after each session.</span>
+              </div>
+            </div>
+          </div>
+          <div class="onboard-contact">
+            Questions? Reach out at <a href="mailto:thegenie@omegaalgo.net">thegenie@omegaalgo.net</a> or <a href="https://omegaalgo.net/onboarding.html" target="_blank">read the full onboarding guide</a>.
+          </div>
         </div>
-        <h3>Account Not Set Up Yet</h3>
-        <p>Your dashboard is being configured. Kip will have it ready shortly — reach out at <a href="mailto:thegenie@omegaalgo.net">thegenie@omegaalgo.net</a> if you have questions.</p>
       </div>
 
       <!-- Client account cards -->
@@ -106,7 +145,7 @@
   <div id="page-admin" class="page hidden">
     <header class="portal-header">
       <a href="/" class="portal-logo">
-        <svg width="38" height="38" viewBox="0 0 64 64" fill="none"><text x="32" y="54" text-anchor="middle" font-family="Georgia, serif" font-size="56" font-weight="bold" fill="#ff6a00">Ω</text></svg>
+        <span class="portal-logo-omega portal-logo-omega--sm" aria-hidden="true">Ω</span>
         <span class="portal-logo-text sm">OMEGA<span class="portal-logo-sub">ALGO</span></span>
       </a>
       <div class="portal-header-right">
