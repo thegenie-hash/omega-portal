@@ -42,7 +42,7 @@ function nextId(arr) {
 })();
 
 // ── Middleware ───────────────────────────────────
-app.use(express.json());
+app.use(express.json({ limit: '5mb' }));
 app.use(cookieParser());
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -93,7 +93,9 @@ app.get('/api/dashboard', requireAuth, (req, res) => {
   if (!user) return res.status(404).json({ error: 'Not found' });
   if (user.role === 'admin') return res.json({ role: 'admin' });
   const client = db.clients.find(c => c.user_id === user.id) || null;
-  res.json({ role: 'client', name: user.name, email: user.email, client });
+  res.json({ role: 'client', name: user.name, email: user.email, client,
+    agreement_signed: client ? (client.agreement_signed || false) : false,
+    signed_at: client ? (client.signed_at || null) : null });
 });
 
 // ── Admin: list clients ──────────────────────────
@@ -105,7 +107,8 @@ app.get('/api/admin/clients', requireAdmin, (req, res) => {
       const c = db.clients.find(c => c.user_id === u.id) || {};
       return { id: u.id, email: u.email, name: u.name, created_at: u.created_at,
                firm: c.firm, account_size: c.account_size, equity: c.equity,
-               status: c.status, notes: c.notes, updated_at: c.updated_at };
+               status: c.status, notes: c.notes, updated_at: c.updated_at,
+               agreement_signed: c.agreement_signed || false, signed_at: c.signed_at || null, signed_name: c.signed_name || '' };
     })
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   res.json(clients);
@@ -151,6 +154,47 @@ app.delete('/api/admin/clients/:id', requireAdmin, (req, res) => {
   db.users   = db.users.filter(u => !(u.id === uid && u.role === 'client'));
   writeDB(db);
   res.json({ ok: true });
+});
+
+// ── Sign Agreement ──────────────────────────────
+app.post('/api/sign-agreement', requireAuth, (req, res) => {
+  const { full_name, prop_account, signature_data } = req.body;
+  if (!full_name || !signature_data) return res.status(400).json({ error: 'Name and signature required' });
+  const db   = readDB();
+  const user = db.users.find(u => u.id === req.user.id);
+  if (!user) return res.status(404).json({ error: 'Not found' });
+
+  let client = db.clients.find(c => c.user_id === user.id);
+  if (!client) {
+    client = { id: nextId(db.clients), user_id: user.id, firm: 'Tradeify',
+      account_size: 0, equity: 0, status: 'Pending', notes: '', updated_at: new Date().toISOString() };
+    db.clients.push(client);
+  }
+
+  client.agreement_signed    = true;
+  client.signed_at           = new Date().toISOString();
+  client.signed_name         = full_name;
+  client.signed_prop_account = prop_account || '';
+  client.signature_data      = signature_data;
+  client.updated_at          = new Date().toISOString();
+
+  writeDB(db);
+  res.json({ ok: true, signed_at: client.signed_at });
+});
+
+// ── Get signed agreement snapshot ────────────────
+app.get('/api/agreement-snapshot', requireAuth, (req, res) => {
+  const db     = readDB();
+  const user   = db.users.find(u => u.id === req.user.id);
+  const client = db.clients.find(c => c.user_id === req.user.id);
+  if (!client || !client.agreement_signed) return res.status(404).json({ error: 'No signed agreement found' });
+  res.json({
+    full_name:      client.signed_name,
+    email:          user.email,
+    prop_account:   client.signed_prop_account,
+    signed_at:      client.signed_at,
+    signature_data: client.signature_data
+  });
 });
 
 // ── Admin: reset password ────────────────────────
